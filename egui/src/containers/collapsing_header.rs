@@ -195,49 +195,51 @@ impl CollapsingHeader {
             galley.size.y + 2.0 * ui.style().spacing.button_padding.y,
         );
         desired_size = desired_size.at_least(ui.style().spacing.interact_size);
-        let rect = ui.allocate_space(desired_size);
-
-        let response = ui.interact(rect, id, Sense::click());
-        let text_pos = pos2(text_pos.x, response.rect.center().y - galley.size.y / 2.0);
 
         let mut state = State::from_memory_with_default_open(ui.ctx(), id, default_open);
-        if response.clicked {
-            state.toggle(ui);
+
+        if let Some(rect) = ui.request_space(desired_size) {
+            let response = ui.interact(rect, id, Sense::click());
+            let text_pos = pos2(text_pos.x, response.rect.center().y - galley.size.y / 2.0);
+
+            if response.clicked {
+                state.toggle(ui);
+            }
+
+            let bg_index = ui.painter().add(PaintCmd::Noop);
+
+            {
+                let (mut icon_rect, _) = ui.style().spacing.icon_rectangles(response.rect);
+                icon_rect.set_center(pos2(
+                    response.rect.left() + ui.style().spacing.indent / 2.0,
+                    response.rect.center().y,
+                ));
+                let icon_response = Response {
+                    rect: icon_rect,
+                    ..response.clone()
+                };
+                let openness = state.openness(ui.ctx(), id);
+                paint_icon(ui, openness, &icon_response);
+            }
+
+            let painter = ui.painter();
+            painter.galley(
+                text_pos,
+                galley,
+                label.text_style_or_default(ui.style()),
+                ui.style().interact(&response).text_color(),
+            );
+
+            painter.set(
+                bg_index,
+                PaintCmd::Rect {
+                    rect: response.rect,
+                    corner_radius: ui.style().interact(&response).corner_radius,
+                    fill: ui.style().interact(&response).bg_fill,
+                    stroke: Default::default(),
+                },
+            );
         }
-
-        let bg_index = ui.painter().add(PaintCmd::Noop);
-
-        {
-            let (mut icon_rect, _) = ui.style().spacing.icon_rectangles(response.rect);
-            icon_rect.set_center(pos2(
-                response.rect.left() + ui.style().spacing.indent / 2.0,
-                response.rect.center().y,
-            ));
-            let icon_response = Response {
-                rect: icon_rect,
-                ..response.clone()
-            };
-            let openness = state.openness(ui.ctx(), id);
-            paint_icon(ui, openness, &icon_response);
-        }
-
-        let painter = ui.painter();
-        painter.galley(
-            text_pos,
-            galley,
-            label.text_style_or_default(ui.style()),
-            ui.style().interact(&response).text_color(),
-        );
-
-        painter.set(
-            bg_index,
-            PaintCmd::Rect {
-                rect: response.rect,
-                corner_radius: ui.style().interact(&response).corner_radius,
-                fill: ui.style().interact(&response).bg_fill,
-                stroke: Default::default(),
-            },
-        );
 
         Prepared { id, state }
     }
