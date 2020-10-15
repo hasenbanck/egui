@@ -192,12 +192,12 @@ impl Fonts {
         debug_assert_eq!(pos, (0, 0));
 
         // FontFamily::Monospace (Use 13 for this. NOTHING ELSE).
-        let monospace_typeface_data: &[u8] = include_bytes!("../../fonts/ProggyClean.ttf");
+        let monospace_typeface_data: &[u8] = include_bytes!("../../fonts/FiraCode-Regular.ttf");
         // FontFamily::VariableWidth.
         // FIXME: https://github.com/mooman219/fontdue/issues/38
         // FIXME: https://github.com/RazrFalcon/ttf-parser/issues/43
-        let variable_typeface_data: &[u8] = include_bytes!("../../fonts/Comfortaa-Regular.ttf");
-        //let variable_typeface_data: &[u8] = include_bytes!("../../fonts/Roboto-Regular.ttf");
+        //let variable_typeface_data: &[u8] = include_bytes!("../../fonts/Comfortaa-Regular.ttf");
+        let variable_typeface_data: &[u8] = include_bytes!("../../fonts/Roboto-Regular.ttf");
 
         // Fonts need to be added in the same order as defined in the `FontFamily.font_index()` method.
         self.fonts.push(
@@ -313,6 +313,7 @@ impl Fonts {
         }
 
         let height = self.heights[&style];
+        let line_spacing = self.line_spacings[&style];
         let font_index = self.configuration.definitions[&style].family.font_index();
 
         let text_style = fontdue::layout::TextStyle {
@@ -329,6 +330,7 @@ impl Fonts {
         );
 
         // This assumes horizontal layout rendered from left to right.
+        // TODO this is buggy, since the last glyph is not always on the far right. We need to move through all glyphs to get the most right one.
         let GlyphPosition {
             x: first_x,
             y: first_y,
@@ -344,7 +346,16 @@ impl Fonts {
 
         let width = (last_x + last_width as f32) - first_x;
         let height = last_y - (first_y - first_height as f32);
-        layout.size = vec2(width, height);
+
+        // Align the with so that 30% of the font height are free after the last glyph.
+        // TODO make sure that it's constantly 30%!
+        let next_best_width = (width + (height * 0.3)).ceil();
+
+        // The height should be aligned to the line spacing.
+        // TODO this is a little bit buggy. Find a workaround or wait for layout improvements in fontdue.
+        let next_best_height = (height / line_spacing).ceil() * line_spacing;
+
+        layout.size = vec2(next_best_width, next_best_height);
 
         layout
     }

@@ -764,11 +764,6 @@ fn tessellate_paint_command(
             let pixels_per_point = fonts.lock().configuration().pixels_per_point;
 
             let line_height = fonts.lock().text_style_line_spacing(text_style);
-            let clip_rect = clip_rect.expand(5.0); // Some fudge to handle letter slightly larger than expected.
-
-            // FIXME This value should be calculated by parent widget.
-            // Eye-balled for buttons.
-            let text_offset = vec2(0.0, -1.0);
 
             let mut was_visible = false;
             for glyph in &layout.glyph_positions {
@@ -793,7 +788,7 @@ fn tessellate_paint_command(
 
                 let glyph_info = fonts.lock().glyph_info(&glyph.key);
                 let uv_rect = glyph_info.uv_rect;
-                let mut left_top = pos + vec2(glyph.x, glyph.y) + text_offset;
+                let mut left_top = pos + vec2(glyph.x, glyph.y);
                 left_top.x = round_to_pixel(left_top.x, pixels_per_point); // Pixel-perfection.
                 left_top.y = round_to_pixel(left_top.y, pixels_per_point); // Pixel-perfection.
 
@@ -804,10 +799,19 @@ fn tessellate_paint_command(
                 );
                 out.add_rect_with_uv(p, uv, color);
 
-                /* FIXME Remove me
+                // FIXME Remove me
+                /*
                 let pos_rec = Rect::from_center_size(
                     Pos2::new(pos.x + glyph.x, pos.y + glyph.y),
-                    vec2(2.0, 2.0),
+                    vec2(1.0, 1.0),
+                );
+                out.add_colored_rect(pos_rec, Srgba::new(255, 0, 0, 255));
+                let pos_rec = Rect::from_center_size(
+                    Pos2::new(
+                        pos.x + glyph.x + glyph.width as f32,
+                        pos.y + glyph.y + glyph.height as f32,
+                    ),
+                    vec2(1.0, 1.0),
                 );
                 out.add_colored_rect(pos_rec, Srgba::new(255, 0, 0, 255));
                 */
