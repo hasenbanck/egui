@@ -69,28 +69,28 @@ impl FontConfiguration {
             TextStyle::Body,
             FontDefinition {
                 family: FontFamily::VariableWidth,
-                scale_in_points: 14.0,
+                scale_in_points: 12.0,
             },
         );
         definitions.insert(
             TextStyle::Button,
             FontDefinition {
                 family: FontFamily::VariableWidth,
-                scale_in_points: 16.0,
+                scale_in_points: 13.0,
             },
         );
         definitions.insert(
             TextStyle::Heading,
             FontDefinition {
                 family: FontFamily::VariableWidth,
-                scale_in_points: 24.0,
+                scale_in_points: 20.0,
             },
         );
         definitions.insert(
             TextStyle::Monospace,
             FontDefinition {
                 family: FontFamily::Monospace,
-                scale_in_points: 13.0,
+                scale_in_points: 11.0,
             },
         );
         Self {
