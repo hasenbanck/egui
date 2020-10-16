@@ -9,6 +9,7 @@ pub use egui::{
     app::{App, Backend, Storage},
     Srgba,
 };
+use glium::backend::glutin::glutin::dpi::PhysicalSize;
 
 const EGUI_MEMORY_KEY: &str = "egui";
 const WINDOW_KEY: &str = "window";
@@ -58,7 +59,8 @@ pub fn run(title: &str, mut storage: FileStorage, mut app: impl App + 'static) -
         .with_decorations(true)
         .with_resizable(true)
         .with_title(title)
-        .with_transparent(false);
+        .with_transparent(false)
+        .with_inner_size(PhysicalSize::new(1920, 1080));
 
     let window_settings: Option<WindowSettings> = egui::app::get_value(&storage, WINDOW_KEY);
     if let Some(window_settings) = &window_settings {
